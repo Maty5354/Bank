@@ -1,0 +1,749 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="theme-color" content="#121212">
+    <title>Family Bank - ATM Simulator</title>
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        /* Dark Mode Variables */
+        :root {
+            --bg-primary: #121212;
+            --bg-secondary: #1e1e1e;
+            --bg-card: #252525;
+            --text-primary: #e0e0e0;
+            --text-secondary: #a0a0a0;
+            --accent: #4a9eff;
+            --accent-hover: #6bb6ff;
+            --success: #00c853;
+            --danger: #ff5252;
+            --warning: #ffab00;
+            --border: #333;
+            --shadow: 0 4px 12px rgba(0,0,0,0.3);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            background: var(--bg-primary);
+            color: var(--text-primary);
+            padding-bottom: 80px;
+            user-select: none;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        .container {
+            max-width: 500px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        /* Header */
+        .header {
+            background: var(--bg-secondary);
+            padding: 15px;
+            box-shadow: var(--shadow);
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+
+        .lang-indicator {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            background: var(--accent);
+            color: white;
+            padding: 4px 8px;
+            border-radius: 12px;
+            font-size: 11px;
+            font-weight: bold;
+        }
+
+        .balance-card {
+            background: linear-gradient(135deg, var(--accent), var(--accent-hover));
+            padding: 25px;
+            border-radius: 16px;
+            margin: 20px 0;
+            box-shadow: var(--shadow);
+        }
+
+        .balance-card.cash-card {
+            background: linear-gradient(135deg, var(--success), #009624);
+        }
+
+        .balance-label {
+            font-size: 14px;
+            opacity: 0.9;
+            margin-bottom: 5px;
+        }
+
+        .balance-amount {
+            font-size: 32px;
+            font-weight: bold;
+            margin-bottom: 15px;
+        }
+
+        .balance-stats {
+            display: flex;
+            justify-content: space-between;
+            gap: 10px;
+        }
+
+        .stat-item {
+            flex: 1;
+            text-align: center;
+            padding: 10px;
+            background: rgba(255,255,255,0.1);
+            border-radius: 8px;
+        }
+
+        .stat-value {
+            font-size: 18px;
+            font-weight: bold;
+        }
+
+        .stat-label {
+            font-size: 12px;
+            opacity: 0.8;
+        }
+
+        /* Navigation */
+        .bottom-nav {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background: var(--bg-secondary);
+            backdrop-filter: blur(10px);
+            display: flex;
+            justify-content: space-around;
+            padding: 10px 0;
+            box-shadow: 0 -2px 10px rgba(0,0,0,0.3);
+            z-index: 1000;
+        }
+
+        .nav-item {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 8px;
+            cursor: pointer;
+            transition: color 0.2s;
+            color: var(--text-secondary);
+        }
+
+        .nav-item.active {
+            color: var(--accent);
+        }
+
+        .nav-icon {
+            font-size: 24px;
+            margin-bottom: 4px;
+        }
+
+        .nav-label {
+            font-size: 11px;
+            font-weight: 500;
+        }
+
+        /* Pages */
+        .page {
+            display: none;
+            animation: fadeIn 0.3s;
+        }
+
+        .page.active {
+            display: block;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* Forms */
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 8px;
+            color: var(--text-secondary);
+            font-size: 14px;
+            font-weight: 500;
+        }
+
+        input, select, textarea {
+            width: 100%;
+            padding: 12px;
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            color: var(--text-primary);
+            font-size: 16px;
+            transition: border-color 0.2s;
+        }
+
+        input:focus, select:focus, textarea:focus {
+            outline: none;
+            border-color: var(--accent);
+        }
+
+        textarea {
+            resize: vertical;
+            min-height: 80px;
+        }
+
+        /* Custom Checkbox Toggle */
+        .checkbox-toggle {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 12px;
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .checkbox-toggle:hover {
+            border-color: var(--accent);
+        }
+
+        .checkbox-toggle input[type="checkbox"] {
+            display: none;
+        }
+
+        .checkbox-toggle .toggle-switch {
+            width: 50px;
+            height: 28px;
+            background: var(--border);
+            border-radius: 14px;
+            position: relative;
+            transition: background 0.2s;
+        }
+
+        .checkbox-toggle .toggle-switch::after {
+            content: '';
+            position: absolute;
+            width: 24px;
+            height: 24px;
+            background: white;
+            border-radius: 50%;
+            top: 2px;
+            left: 2px;
+            transition: transform 0.2s;
+        }
+
+        .checkbox-toggle input[type="checkbox"]:checked + .toggle-switch {
+            background: var(--accent);
+        }
+
+        .checkbox-toggle input[type="checkbox"]:checked + .toggle-switch::after {
+            transform: translateX(22px);
+        }
+
+        .checkbox-toggle label {
+            margin: 0;
+            cursor: pointer;
+            flex: 1;
+        }
+
+        /* Buttons */
+        .btn {
+            padding: 14px 24px;
+            border: none;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+            width: 100%;
+            margin-top: 10px;
+        }
+
+        .btn-primary {
+            background: var(--accent);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background: var(--accent-hover);
+            transform: translateY(-2px);
+        }
+
+        .btn-success {
+            background: var(--success);
+            color: white;
+        }
+
+        .btn-danger {
+            background: var(--danger);
+            color: white;
+        }
+
+        .btn-warning {
+            background: var(--warning);
+            color: black;
+        }
+
+        /* Loan Cards */
+        .loan-card {
+            background: var(--bg-card);
+            padding: 18px;
+            border-radius: 12px;
+            margin-bottom: 12px;
+            box-shadow: var(--shadow);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .loan-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 10px;
+        }
+
+        .loan-borrower {
+            font-size: 18px;
+            font-weight: 600;
+        }
+
+        .loan-amount {
+            font-size: 20px;
+            font-weight: bold;
+        }
+
+        .loan-amount.pending {
+            color: var(--danger);
+        }
+
+        .loan-amount.partial {
+            color: var(--warning);
+        }
+
+        .loan-amount.paid {
+            color: var(--success);
+        }
+
+        .loan-details {
+            font-size: 13px;
+            color: var(--text-secondary);
+            line-height: 1.5;
+        }
+
+        .loan-actions {
+            display: flex;
+            gap: 10px;
+            margin-top: 15px;
+        }
+
+        .loan-actions .btn {
+            flex: 1;
+            padding: 8px;
+            font-size: 14px;
+            margin: 0;
+        }
+
+        .status-badge {
+            display: inline-block;
+            padding: 4px 10px;
+            border-radius: 20px;
+            font-size: 11px;
+            font-weight: bold;
+            text-transform: uppercase;
+        }
+
+        .status-pending { background: rgba(255, 82, 82, 0.2); color: var(--danger); }
+        .status-partial { background: rgba(255, 171, 0, 0.2); color: var(--warning); }
+        .status-paid { background: rgba(0, 200, 83, 0.2); color: var(--success); }
+
+        /* Filters */
+        .filter-bar {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+            overflow-x: auto;
+            padding-bottom: 5px;
+        }
+
+        .filter-chip {
+            padding: 8px 16px;
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 20px;
+            font-size: 14px;
+            white-space: nowrap;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .filter-chip.active {
+            background: var(--accent);
+            border-color: var(--accent);
+            color: white;
+        }
+
+        /* Settings */
+        .setting-item {
+            background: var(--bg-card);
+            padding: 18px;
+            border-radius: 12px;
+            margin-bottom: 12px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            cursor: pointer;
+        }
+
+        .setting-info {
+            flex: 1;
+        }
+
+        .setting-title {
+            font-weight: 600;
+            margin-bottom: 4px;
+        }
+
+        .setting-desc {
+            font-size: 13px;
+            color: var(--text-secondary);
+        }
+
+        .toggle-switch {
+            width: 50px;
+            height: 28px;
+            background: var(--border);
+            border-radius: 14px;
+            position: relative;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+
+        .toggle-switch.active {
+            background: var(--accent);
+        }
+
+        .toggle-switch::after {
+            content: '';
+            position: absolute;
+            width: 24px;
+            height: 24px;
+            background: white;
+            border-radius: 50%;
+            top: 2px;
+            left: 2px;
+            transition: transform 0.2s;
+        }
+
+        .toggle-switch.active::after {
+            transform: translateX(22px);
+        }
+
+        /* Modals */
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0,0,0,0.8);
+            z-index: 2000;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+
+        .modal.active {
+            display: flex;
+        }
+
+        .modal-content {
+            background: var(--bg-secondary);
+            padding: 25px;
+            border-radius: 16px;
+            width: 100%;
+            max-width: 400px;
+            max-height: 90vh;
+            overflow-y: auto;
+        }
+
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+
+        .modal-title {
+            font-size: 20px;
+            font-weight: bold;
+        }
+
+        .close-btn {
+            font-size: 28px;
+            color: var(--text-secondary);
+            cursor: pointer;
+            line-height: 1;
+        }
+
+        .camera-preview {
+            width: 100%;
+            max-width: 400px;
+            border-radius: 8px;
+            margin: 10px 0;
+        }
+
+        .capture-btn {
+            position: absolute;
+            bottom: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 70px;
+            height: 70px;
+            border-radius: 50%;
+            background: white;
+            border: 4px solid var(--accent);
+            cursor: pointer;
+        }
+
+        /* Custom Alert Modal */
+        .custom-alert {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0,0,0,0.85);
+            z-index: 3000;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+            backdrop-filter: blur(5px);
+        }
+
+        .custom-alert.active {
+            display: flex;
+            animation: fadeIn 0.3s;
+        }
+
+        .alert-content {
+            background: var(--bg-secondary);
+            border-radius: 16px;
+            width: 100%;
+            max-width: 400px;
+            box-shadow: var(--shadow);
+            overflow: hidden;
+            transform: scale(0.95);
+            transition: transform 0.3s;
+        }
+
+        .custom-alert.active .alert-content {
+            transform: scale(1);
+        }
+
+        .alert-header {
+            padding: 20px 20px 0;
+            text-align: center;
+        }
+
+        .alert-icon {
+            font-size: 48px;
+            margin-bottom: 10px;
+        }
+
+        .alert-icon.success { color: var(--success); }
+        .alert-icon.error { color: var(--danger); }
+        .alert-icon.warning { color: var(--warning); }
+        .alert-icon.info { color: var(--accent); }
+
+        .alert-title {
+            font-size: 20px;
+            font-weight: bold;
+            margin-bottom: 10px;
+        }
+
+        .alert-message {
+            padding: 0 20px 20px;
+            font-size: 16px;
+            line-height: 1.5;
+            color: var(--text-secondary);
+        }
+
+        .alert-buttons {
+            display: flex;
+            border-top: 1px solid var(--border);
+        }
+
+        .alert-btn {
+            flex: 1;
+            padding: 16px;
+            border: none;
+            background: none;
+            color: var(--text-primary);
+            font-size: 16px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+
+        .alert-btn:hover {
+            background: var(--bg-card);
+        }
+
+        .alert-btn.primary {
+            color: var(--accent);
+        }
+
+        .alert-btn.danger {
+            color: var(--danger);
+        }
+
+        /* Interest input styling */
+        .interest-input-group {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .interest-input-group input {
+            flex: 1;
+        }
+
+        .interest-input-group .percentage {
+            color: var(--text-secondary);
+            font-size: 18px;
+            margin-right: 8px;
+        }
+
+        /* Responsive */
+        @media (max-width: 480px) {
+            .container {
+                padding: 15px;
+            }
+            
+            .balance-amount {
+                font-size: 28px;
+            }
+
+            .modal-content {
+                padding: 20px;
+            }
+        }
+
+        @media (max-width: 768px) and (orientation: landscape) {
+            .modal-content {
+                max-height: 80vh;
+            }
+            
+            .alert-content {
+                max-width: 350px;
+            }
+        }
+
+        /* Utility */
+        .text-center { text-align: center; }
+        .mt-20 { margin-top: 20px; }
+        .hidden { display: none; }
+        .swipe-hint {
+            font-size: 11px;
+            color: var(--text-secondary);
+            text-align: center;
+            margin-top: 5px;
+        }
+    </style>
+</head>
+<body>
+    <!-- Custom Alert Modal -->
+    <div id="customAlert" class="custom-alert">
+        <div class="alert-content">
+            <div class="alert-header">
+                <div class="alert-icon" id="alertIcon"></div>
+                <div class="alert-title" id="alertTitle"></div>
+            </div>
+            <div class="alert-message" id="alertMessage"></div>
+            <div class="alert-buttons" id="alertButtons"></div>
+        </div>
+    </div>
+
+    <!-- Language Indicator -->
+    <div class="lang-indicator" id="langIndicator">EN</div>
+
+    <!-- Header -->
+    <div class="header">
+        <div class="container">
+            <h1 id="appTitle"><i class="fas fa-university"></i> Family Bank</h1>
+        </div>
+    </div>
+
+    <div class="container">
+        <!-- Dashboard Page -->
+        <div id="dashboard" class="page active">
+            <!-- Personal Cash Card -->
+            <div class="balance-card cash-card">
+                <div class="balance-label" id="myCashLabel">My Cash Balance</div>
+                <div class="balance-amount" id="personalBalance">0.00 RON</div>
+                <div class="loan-actions">
+                    <button class="btn btn-success" id="addCashBtn" onclick="showAddCash()">
+                        <i class="fas fa-plus-circle"></i> <span id="addCashText">Add Cash</span>
+                    </button>
+                    <button class="btn btn-warning" id="withdrawCashBtn" onclick="showWithdrawCash()">
+                        <i class="fas fa-minus-circle"></i> <span id="withdrawCashText">Withdraw</span>
+                    </button>
+                </div>
+            </div>
+
+            <div class="balance-card">
+                <div class="balance-label" id="totalOutstandingLabel">Total Outstanding</div>
+                <div class="balance-amount" id="totalBalance">0.00 RON</div>
+                <div class="balance-stats">
+                    <div class="stat-item">
+                        <div class="stat-value" id="totalLent">0</div>
+                        <div class="stat-label" id="totalLentLabel">Total Lent</div>
+                    </div>
+                    <div class="stat-item">
+                        <div class="stat-value" id="totalRepaid">0</div>
+                        <div class="stat-label" id="totalRepaidLabel">Repaid</div>
+                    </div>
+                    <div class="stat-item">
+                        <div class="stat-value" id="loanCount">0</div>
+                        <div class="stat-label" id="activeLoansLabel">Active Loans</div>
+                    </div>
+                </div>
+            </div>
+
+            <div style="margin-top: 25px;">
+                <h3 id="recentActivityTitle" style="margin-bottom: 15px;">
+                    <i class="fas fa-clock"></i> Recent Activity
+                </h3>
+                <div id="recentLoans"></div>
+            </div>
+
+            <div class="loan-actions mt-20">
+                <button class="btn btn-primary" id="newLoanBtn" onclick="showPage('addLoan')">
+                    <i class="fas fa-hand-holding-usd"></i> <span id="newLoanText">New Loan</span>
+                </button>
+                <button class="btn btn-success" id="quickRepayBtn" onclick="quickRepay()">
+                    <i class="fas fa-donate"></i> <span id="quickRepayText">Quick Repay</span>
+                </button>
+            </div>
+        </div>
+
+        <!-- Add Loan Page -->
+        <div id="addLoan" class="page">
+            <h2 id="createLoanTitle"><i class="fas fa-plus-circle"></i> Create Loan</h2>
+       
