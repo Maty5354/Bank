@@ -746,4 +746,1333 @@
         <!-- Add Loan Page -->
         <div id="addLoan" class="page">
             <h2 id="createLoanTitle"><i class="fas fa-plus-circle"></i> Create Loan</h2>
-       
+            <form id="loanForm" onsubmit="addLoan(event)">
+                <div class="form-group">
+                    <label id="borrowerLabel">Borrower</label>
+                    <select id="borrower" required>
+                        <option value="" id="selectBorrower">Select borrower</option>
+                        <option value="Mom" id="momOption">Mom</option>
+                        <option value="Dad" id="dadOption">Dad</option>
+                        <option value="Other" id="otherOption">Other</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label id="amountLabel">Amount (RON)</label>
+                    <input type="number" id="amount" step="0.01" required placeholder="0.00">
+                </div>
+                <div class="form-group">
+                    <label id="interestLabel">Daily Interest Rate (%)</label>
+                    <div class="interest-input-group">
+                        <input type="number" id="interestRate" step="0.01" placeholder="0.00" value="0">
+                        <span class="percentage">%</span>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label id="reasonLabel">Reason (Optional)</label>
+                    <textarea id="reason" placeholder="What is this for?"></textarea>
+                </div>
+<div class="form-group">
+  <label for="deductFromCash" class="checkbox-toggle">
+    <input type="checkbox" id="deductFromCash" checked>
+    <div class="toggle-switch"></div>
+    <span id="deductText">Deduct from my cash balance</span>
+  </label>
+</div>
+                <div class="form-group">
+                    <label id="photoProofLabel">Add Photo Proof</label>
+                    <div style="display: flex; gap: 10px;">
+                        <button type="button" class="btn" style="flex: 1;" onclick="openCamera()">
+                            <i class="fas fa-camera"></i> <span id="cameraBtn">Camera</span>
+                        </button>
+                        <button type="button" class="btn" style="flex: 1;" onclick="document.getElementById('fileInput').click()">
+                            <i class="fas fa-image"></i> <span id="galleryBtn">Gallery</span>
+                        </button>
+                        <input type="file" id="fileInput" accept="image/*" style="display: none;" onchange="handleFileSelect(event)">
+                    </div>
+                    <div id="photoPreview" style="margin-top: 10px;"></div>
+                </div>
+                <button type="submit" class="btn btn-primary" id="createLoanBtn">
+                    <i class="fas fa-check"></i> Create Loan
+                </button>
+            </form>
+        </div>
+
+        <!-- Loans List Page -->
+        <div id="loansList" class="page">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+                <h2 id="allLoansTitle"><i class="fas fa-list"></i> All Loans</h2>
+                <button class="btn btn-primary" style="width: auto; padding: 10px 16px; font-size: 14px;" onclick="exportData()">
+                    <i class="fas fa-download"></i> <span id="exportBtn">Export</span>
+                </button>
+            </div>
+
+            <div class="filter-bar">
+                <div class="filter-chip active" onclick="filterLoans('all')" id="filterAll">All</div>
+                <div class="filter-chip" onclick="filterLoans('pending')" id="filterPending">Pending</div>
+                <div class="filter-chip" onclick="filterLoans('partial')" id="filterPartial">Partial</div>
+                <div class="filter-chip" onclick="filterLoans('paid')" id="filterPaid">Paid</div>
+                <div class="filter-chip" onclick="filterLoans('mom')" id="filterMom">Mom</div>
+                <div class="filter-chip" onclick="filterLoans('dad')" id="filterDad">Dad</div>
+            </div>
+
+            <div id="loansContainer"></div>
+        </div>
+
+        <!-- Settings Page -->
+        <div id="settings" class="page">
+            <h2 id="settingsTitle"><i class="fas fa-cog"></i> Settings</h2>
+            
+            <h3 id="langSectionTitle" style="margin: 20px 0 10px; font-size: 14px; color: var(--text-secondary);">LANGUAGE</h3>
+            <div class="setting-item" onclick="toggleLanguage()">
+                <div class="setting-info">
+                    <div class="setting-title" id="langTitle">Language</div>
+                    <div class="setting-desc" id="langDesc">Switch to Romanian / Schimbați în engleză</div>
+                </div>
+                <div style="display: flex; align-items: center; gap: 8px;">
+                    <span id="currentLang" style="color: var(--accent); font-weight: bold;">ENGLISH</span>
+                    <span style="color: var(--text-secondary);">→</span>
+                </div>
+            </div>
+
+            <h3 id="securitySectionTitle" style="margin: 20px 0 10px; font-size: 14px; color: var(--text-secondary);">SECURITY</h3>
+            <div class="setting-item" onclick="togglePIN()">
+                <div class="setting-info">
+                    <div class="setting-title" id="pinTitle">PIN Protection</div>
+                    <div class="setting-desc" id="pinDesc">Prevent parents from editing</div>
+                </div>
+                <div class="toggle-switch" id="pinToggle"></div>
+            </div>
+
+            <h3 id="dataSectionTitle" style="margin: 20px 0 10px; font-size: 14px; color: var(--text-secondary);">DATA</h3>
+            <div class="setting-item" onclick="backupData()">
+                <div class="setting-info">
+                    <div class="setting-title" id="backupTitle">Backup Data</div>
+                    <div class="setting-desc" id="backupDesc">Save to file</div>
+                </div>
+                <span style="color: var(--text-secondary);">→</span>
+            </div>
+
+            <div class="setting-item" onclick="restoreData()">
+                <div class="setting-info">
+                    <div class="setting-title" id="restoreTitle">Restore Data</div>
+                    <div class="setting-desc" id="restoreDesc">Load from file</div>
+                </div>
+                <span style="color: var(--text-secondary);">→</span>
+            </div>
+
+            <div class="setting-item" onclick="clearAllData()">
+                <div class="setting-info">
+                    <div class="setting-title" id="clearTitle">Clear All Data</div>
+                    <div class="setting-desc" id="clearDesc"><i class="fas fa-exclamation-triangle"></i> This cannot be undone</div>
+                </div>
+                <span style="color: var(--danger);">→</span>
+            </div>
+
+            <div class="text-center" style="margin-top: 30px; color: var(--text-secondary);">
+                <p id="appVersion"><i class="fas fa-code"></i> Family Bank v2.0</p>
+                <p style="font-size: 12px;" id="appSubtitle">Made for Romanian "ATMs"</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Bottom Navigation -->
+    <div class="bottom-nav">
+        <div class="nav-item active" onclick="showPage('dashboard')">
+            <div class="nav-icon"><i class="fas fa-home"></i></div>
+            <div class="nav-label" id="navDashboard">Dashboard</div>
+        </div>
+        <div class="nav-item" onclick="showPage('addLoan')">
+            <div class="nav-icon"><i class="fas fa-plus"></i></div>
+            <div class="nav-label" id="navAddLoan">Add Loan</div>
+        </div>
+        <div class="nav-item" onclick="showPage('loansList')">
+            <div class="nav-icon"><i class="fas fa-chart-bar"></i></div>
+            <div class="nav-label" id="navLoans">Loans</div>
+        </div>
+        <div class="nav-item" onclick="showPage('settings')">
+            <div class="nav-icon"><i class="fas fa-cog"></i></div>
+            <div class="nav-label" id="navSettings">Settings</div>
+        </div>
+    </div>
+
+    <!-- Personal Cash Modal -->
+    <div id="cashModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <div class="modal-title" id="cashModalTitle">Manage Cash</div>
+                <div class="close-btn" onclick="closeModal('cashModal')">&times;</div>
+            </div>
+            <form id="cashForm" onsubmit="updatePersonalCash(event)">
+                <div class="form-group">
+                    <label id="amountCashLabel">Amount (RON)</label>
+                    <input type="number" id="cashAmount" step="0.01" required placeholder="0.00">
+                </div>
+                <div class="form-group">
+                    <label id="sourceLabel">Source / Reason</label>
+                    <input type="text" id="cashReason" placeholder="e.g., Salary, Gift, etc.">
+                </div>
+                <div class="form-group">
+                    <label id="typeLabel">Type</label>
+                    <select id="cashType" required>
+                        <option value="add" id="addCashOpt">Add Cash</option>
+                        <option value="withdraw" id="withdrawCashOpt">Withdraw Cash</option>
+                    </select>
+                </div>
+                <button type="submit" class="btn btn-primary" id="confirmCashBtn">
+                    <i class="fas fa-check"></i> Confirm
+                </button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Repay Modal -->
+    <div id="repayModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <div class="modal-title" id="repayModalTitle"><i class="fas fa-donate"></i> Repayment</div>
+                <div class="close-btn" onclick="closeModal('repayModal')">&times;</div>
+            </div>
+            <form id="repayForm" onsubmit="processRepayment(event)">
+                <div class="form-group">
+                    <label id="loanSelectLabel">Loan</label>
+                    <select id="repayLoanSelect" required></select>
+                </div>
+                <div class="form-group">
+                    <label id="repayAmountLabel">Amount to Repay</label>
+                    <input type="number" id="repayAmount" step="0.01" required>
+                </div>
+                <div class="form-group">
+                    <label id="paymentMethodLabel">Payment Method</label>
+                    <select id="paymentMethod">
+                        <option value="Cash" id="cashMethod">Cash</option>
+                        <option value="Bank Transfer" id="transferMethod">Bank Transfer</option>
+                        <option value="Revolut" id="revolutMethod">Revolut</option>
+                    </select>
+                </div>
+                <button type="submit" class="btn btn-success" id="confirmRepayBtn">
+                    <i class="fas fa-check-circle"></i> Confirm Repayment
+                </button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Camera Modal -->
+    <div id="cameraModal" class="modal">
+        <div style="position: relative; width: 100%; max-width: 400px;">
+            <video id="video" class="camera-preview" autoplay></video>
+            <canvas id="canvas" class="hidden"></canvas>
+            <div class="capture-btn" onclick="capturePhoto()"></div>
+        </div>
+    </div>
+
+    <script>
+        // Translations (EN/RO)
+        const translations = {
+            en: {
+                appTitle: "Family Bank",
+                myCashLabel: "My Cash Balance",
+                totalOutstandingLabel: "Total Outstanding",
+                totalLentLabel: "Total Lent",
+                totalRepaidLabel: "Repaid",
+                activeLoansLabel: "Active Loans",
+                recentActivityTitle: "Recent Activity",
+                addCashText: "Add Cash",
+                withdrawCashText: "Withdraw",
+                newLoanText: "New Loan",
+                quickRepayText: "Quick Repay",
+                createLoanTitle: "Create Loan",
+                borrowerLabel: "Borrower",
+                selectBorrower: "Select borrower",
+                momOption: "Mom",
+                dadOption: "Dad",
+                otherOption: "Other",
+                amountLabel: "Amount (RON)",
+                interestLabel: "Daily Interest Rate (%)",
+                reasonLabel: "Reason (Optional)",
+                deductText: "Deduct from my cash balance",
+                photoProofLabel: "Add Photo Proof",
+                cameraBtn: "Camera",
+                galleryBtn: "Gallery",
+                createLoanBtn: "Create Loan",
+                allLoansTitle: "All Loans",
+                exportBtn: "Export",
+                filterAll: "All",
+                filterPending: "Pending",
+                filterPartial: "Partial",
+                filterPaid: "Paid",
+                filterMom: "Mom",
+                filterDad: "Dad",
+                settingsTitle: "Settings",
+                langSectionTitle: "LANGUAGE",
+                langTitle: "Language",
+                langDesc: "Switch to Romanian",
+                currentLang: "ENGLISH",
+                securitySectionTitle: "SECURITY",
+                pinTitle: "PIN Protection",
+                pinDesc: "Prevent parents from editing",
+                dataSectionTitle: "DATA",
+                backupTitle: "Backup Data",
+                backupDesc: "Save to file",
+                restoreTitle: "Restore Data",
+                restoreDesc: "Load from file",
+                clearTitle: "Clear All Data",
+                clearDesc: "<i class=\"fas fa-exclamation-triangle\"></i> This cannot be undone",
+                appVersion: "Family Bank v2.0",
+                appSubtitle: "Made for Romanian ATMs",
+                navDashboard: "Dashboard",
+                navAddLoan: "Add Loan",
+                navLoans: "Loans",
+                navSettings: "Settings",
+                cashModalTitle: "Manage Cash",
+                amountCashLabel: "Amount (RON)",
+                sourceLabel: "Source / Reason",
+                typeLabel: "Type",
+                addCashOpt: "Add Cash",
+                withdrawCashOpt: "Withdraw Cash",
+                confirmCashBtn: "Confirm",
+                repayModalTitle: "Repayment",
+                loanSelectLabel: "Loan",
+                repayAmountLabel: "Amount to Repay",
+                paymentMethodLabel: "Payment Method",
+                cashMethod: "Cash",
+                transferMethod: "Bank Transfer",
+                revolutMethod: "Revolut",
+                confirmRepayBtn: "Confirm Repayment",
+                deleteConfirm: "Are you sure? This cannot be undone!",
+                lastChanceConfirm: "Last chance! This cannot be undone!",
+                loanCreated: "Loan created successfully!",
+                repaymentSuccess: "Repayment of {amount} RON recorded!",
+                repaymentFailed: "Repayment failed!",
+                noPendingLoans: "No pending loans!",
+                noLoansFound: "No loans found",
+                dataRestored: "Data restored successfully!",
+                invalidBackup: "Invalid backup file!",
+                dataCleared: "All data cleared!",
+                enterPIN: "Enter PIN:",
+                incorrectPIN: "Incorrect PIN!",
+                setPIN: "Set your 4-digit PIN:",
+                invalidPIN: "Invalid PIN! Setting disabled.",
+                setInterestPrompt: "Set interest rate (% daily):",
+                addCashTitle: "Add Cash to Your Stash",
+                withdrawCashTitle: "Withdraw Cash",
+                currentBalance: "Current Balance: {amount} RON",
+                loanDetails: "Loan Details",
+                noReason: "No reason given",
+                dateLabel: "Date",
+                reasonLabel: "Reason",
+                original: "Original",
+                statusLabel: "Status",
+                onDate: "on",
+                photoAttached: "Photo attached",
+                repayments: "Repayments",
+                statusPending: "Pending",
+                statusPartial: "Partial",
+                statusPaid: "Paid",
+                viewDetails: "Details",
+                deleteLoan: "Delete",
+                repayLoan: "Repay",
+                swipePaid: "Swipe right detected. Mark as fully paid?",
+                swipePayment: "Swipe Payment",
+                cashUpdated: "Cash balance updated!",
+                insufficientCash: "Insufficient cash! You only have {amount} RON.",
+                addToCashPrompt: "Add {amount} RON to your cash balance?",
+                interestDisplayText: "{rate}% (daily)",
+                interestAccrued: "Interest Accrued",
+                loanAmount: "Loan Amount"
+            },
+            ro: {
+                appTitle: "Banca de Familie",
+                myCashLabel: "Bani Mei Cash",
+                totalOutstandingLabel: "Total Datorat",
+                totalLentLabel: "Total Împrumutat",
+                totalRepaidLabel: "Rambursat",
+                activeLoansLabel: "Împrumuturi Active",
+                recentActivityTitle: "Activitate Recentă",
+                addCashText: "Adaugă Bani",
+                withdrawCashText: "Retrage",
+                newLoanText: "Împrumut Nou",
+                quickRepayText: "Rambursare Rapidă",
+                createLoanTitle: "Crează Împrumut",
+                borrowerLabel: "Împrumutat",
+                selectBorrower: "Selectează persoana",
+                momOption: "Mama",
+                dadOption: "Tata",
+                otherOption: "Altul",
+                amountLabel: "Sumă (RON)",
+                interestLabel: "Rata Dobânzii Zilnică (%)",
+                reasonLabel: "Motiv (Opțional)",
+                deductText: "Scade din balanța mea de cash",
+                photoProofLabel: "Adaugă Dovadă Foto",
+                cameraBtn: "Cameră",
+                galleryBtn: "Galerie",
+                createLoanBtn: "Crează Împrumut",
+                allLoansTitle: "Toate Împrumuturile",
+                exportBtn: "Exportă",
+                filterAll: "Toate",
+                filterPending: "În Așteptare",
+                filterPartial: "Parțial",
+                filterPaid: "Plătit",
+                filterMom: "Mama",
+                filterDad: "Tata",
+                settingsTitle: "Setări",
+                langSectionTitle: "LIMBAJ",
+                langTitle: "Limbă",
+                langDesc: "Schimbați în engleză",
+                currentLang: "ROMÂNĂ",
+                securitySectionTitle: "SECURITATE",
+                pinTitle: "Protecție PIN",
+                pinDesc: "Previne editarea de către părinți",
+                dataSectionTitle: "DATE",
+                backupTitle: "Backup Date",
+                backupDesc: "Salvează în fișier",
+                restoreTitle: "Restaurează Date",
+                restoreDesc: "Încarcă din fișier",
+                clearTitle: "Șterge Toate Datele",
+                clearDesc: "<i class=\"fas fa-exclamation-triangle\"></i> Această acțiune e ireversibilă",
+                appVersion: "Banca de Familie v2.0",
+                appSubtitle: "Făcut pentru 'ATM-uri' Românești",
+                navDashboard: "Panou",
+                navAddLoan: "Adaugă",
+                navLoans: "Împrumuturi",
+                navSettings: "Setări",
+                cashModalTitle: "Gestionază Cash",
+                amountCashLabel: "Sumă (RON)",
+                sourceLabel: "Sursa / Motiv",
+                typeLabel: "Tip",
+                addCashOpt: "Adaugă Bani",
+                withdrawCashOpt: "Retrage Bani",
+                confirmCashBtn: "Confirmă",
+                repayModalTitle: "Rambursare",
+                loanSelectLabel: "Împrumut",
+                repayAmountLabel: "Sumă de Rambursat",
+                paymentMethodLabel: "Metodă Plată",
+                cashMethod: "Cash",
+                transferMethod: "Transfer Bancar",
+                revolutMethod: "Revolut",
+                confirmRepayBtn: "Confirmă Rambursarea",
+                deleteConfirm: "Ești sigur? Această acțiune e ireversibilă!",
+                lastChanceConfirm: "Ultima șansă! Această acțiune e ireversibilă!",
+                loanCreated: "Împrumut creat cu succes!",
+                repaymentSuccess: "Rambursare de {amount} RON înregistrată!",
+                repaymentFailed: "Rambursare eșuată!",
+                noPendingLoans: "Nu există împrumuturi în așteptare!",
+                noLoansFound: "Nu s-au găsit împrumuturi",
+                dataRestored: "Date restaurate cu succes!",
+                invalidBackup: "Fișier backup invalid!",
+                dataCleared: "Toate datele au fost șterse!",
+                enterPIN: "Introduceți PIN:",
+                incorrectPIN: "PIN incorect!",
+                setPIN: "Setați PIN-ul dvs. de 4 cifre:",
+                invalidPIN: "PIN invalid! Setare dezactivată.",
+                setInterestPrompt: "Setați rata dobânzii (% zilnic):",
+                addCashTitle: "Adaugă Bani în Stoc",
+                withdrawCashTitle: "Retrage Bani",
+                currentBalance: "Balanță Curentă: {amount} RON",
+                loanDetails: "Detalii Împrumut",
+                noReason: "Fără motiv",
+                dateLabel: "Data",
+                reasonLabel: "Motiv",
+                original: "Original",
+                statusLabel: "Status",
+                onDate: "pe",
+                photoAttached: "Foto atașat",
+                repayments: "Rambursări",
+                statusPending: "În Așteptare",
+                statusPartial: "Parțial",
+                statusPaid: "Plătit",
+                viewDetails: "Detalii",
+                deleteLoan: "Șterge",
+                repayLoan: "Rambursează",
+                swipePaid: "Glisare dreapta detectată. Marcați ca plătit integral?",
+                swipePayment: "Plată prin glisare",
+                cashUpdated: "Balanța cash actualizată!",
+                insufficientCash: "Cash insuficient! Aveți doar {amount} RON.",
+                addToCashPrompt: "Adaugați {amount} RON în balanța dvs. de cash?",
+                interestDisplayText: "{rate}% (zilnic)",
+                interestAccrued: "Dobândă Acumulată",
+                loanAmount: "Suma Împrumutului"
+            }
+        };
+
+        // Enhanced State Management
+        class FamilyBank {
+            constructor() {
+                this.loans = this.loadData('fb_loans') || [];
+                this.settings = this.loadData('fb_settings') || {
+                    darkMode: true,
+                    pinEnabled: false,
+                    pin: '',
+                    currency: 'RON',
+                    language: 'en',
+                    personalCash: 0
+                };
+                this.personalTransactions = this.loadData('fb_cash_transactions') || [];
+                this.currentFilter = 'all';
+                this.capturedPhoto = null;
+            }
+
+            t(key, params = {}) {
+                const text = translations[this.settings.language][key] || translations['en'][key] || key;
+                return Object.keys(params).reduce((str, k) => 
+                    str.replace(new RegExp(`{${k}}`, 'g'), params[k]), text);
+            }
+
+            loadData(key) {
+                try {
+                    return JSON.parse(localStorage.getItem(key));
+                } catch {
+                    return null;
+                }
+            }
+
+            saveData(key, data) {
+                localStorage.setItem(key, JSON.stringify(data));
+            }
+
+            addLoan(loan) {
+                loan.id = Date.now().toString();
+                loan.date = new Date().toISOString();
+                loan.repayments = [];
+                loan.status = 'pending';
+                loan.outstanding = loan.amount;
+                loan.attachments = this.capturedPhoto ? [this.capturedPhoto] : [];
+                loan.interestRate = parseFloat(loan.interestRate) || 0;
+                loan.interestAccrued = 0;
+                loan.lastInterestCalc = new Date().toISOString();
+                
+                // Deduct from personal cash if enabled
+                if (loan.deductFromCash && this.settings.personalCash >= loan.amount) {
+                    this.settings.personalCash -= loan.amount;
+                    this.addPersonalTransaction(-loan.amount, `Loan to ${loan.borrower}`, 'loan');
+                } else if (loan.deductFromCash) {
+                    throw new Error('INSUFFICIENT_CASH');
+                }
+                
+                this.loans.unshift(loan);
+                this.saveData('fb_loans', this.loans);
+                this.saveData('fb_settings', this.settings);
+                this.capturedPhoto = null;
+            }
+
+            calculateInterest(loan) {
+                if (!loan.interestRate || loan.status === 'paid') return 0;
+                
+                const now = new Date();
+                const lastCalc = new Date(loan.lastInterestCalc);
+                const daysElapsed = Math.floor((now - lastCalc) / (1000 * 60 * 60 * 24));
+                
+                if (daysElapsed <= 0) return loan.interestAccrued || 0;
+                
+                const dailyInterest = (loan.outstanding * loan.interestRate) / 100;
+                const totalInterest = dailyInterest * daysElapsed;
+                
+                loan.interestAccrued = (loan.interestAccrued || 0) + totalInterest;
+                loan.lastInterestCalc = now.toISOString();
+                
+                this.saveData('fb_loans', this.loans);
+                return loan.interestAccrued;
+            }
+
+            repayLoan(loanId, amount, method) {
+                const loan = this.loans.find(l => l.id === loanId);
+                if (!loan) return false;
+
+                // Calculate interest first
+                this.calculateInterest(loan);
+                
+                loan.repayments.push({
+                    id: Date.now().toString(),
+                    amount: parseFloat(amount),
+                    date: new Date().toISOString(),
+                    method: method,
+                    interestAtRepayment: loan.interestAccrued || 0
+                });
+
+                const totalRepaid = loan.repayments.reduce((sum, r) => sum + r.amount, 0);
+                loan.outstanding = loan.amount - totalRepaid;
+
+                if (loan.outstanding <= 0) {
+                    loan.status = 'paid';
+                    loan.outstanding = 0;
+                    loan.interestAccrued = 0;
+                } else if (totalRepaid > 0) {
+                    loan.status = 'partial';
+                }
+
+                // Add to personal cash when repaid (optional)
+                if (confirm(this.t('addToCashPrompt', {amount: amount}))) {
+                    this.settings.personalCash += amount;
+                    this.addPersonalTransaction(amount, `Repayment from ${loan.borrower}`, 'repayment');
+                }
+
+                this.saveData('fb_loans', this.loans);
+                this.saveData('fb_settings', this.settings);
+                return true;
+            }
+
+            addPersonalTransaction(amount, reason, type) {
+                this.personalTransactions.unshift({
+                    id: Date.now().toString(),
+                    amount: amount,
+                    reason: reason,
+                    type: type,
+                    date: new Date().toISOString()
+                });
+                this.saveData('fb_cash_transactions', this.personalTransactions);
+            }
+
+            getStats() {
+                const totalLent = this.loans.reduce((sum, l) => sum + l.amount, 0);
+                const totalRepaid = this.loans.reduce((sum, l) => 
+                    sum + l.repayments.reduce((rsum, r) => rsum + r.amount, 0), 0);
+                const outstanding = totalLent - totalRepaid;
+                const activeLoans = this.loans.filter(l => l.status !== 'paid').length;
+                return { totalLent, totalRepaid, outstanding, activeLoans };
+            }
+
+            getLoans(filter = 'all') {
+                let filtered = [...this.loans];
+                
+                if (filter === 'pending') filtered = filtered.filter(l => l.status === 'pending');
+                if (filter === 'partial') filtered = filtered.filter(l => l.status === 'partial');
+                if (filter === 'paid') filtered = filtered.filter(l => l.status === 'paid');
+                if (filter === 'mom') filtered = filtered.filter(l => ['Mom', 'Mama'].includes(l.borrower));
+                if (filter === 'dad') filtered = filtered.filter(l => ['Dad', 'Tata'].includes(l.borrower));
+                
+                return filtered;
+            }
+
+            deleteLoan(id) {
+                this.loans = this.loans.filter(l => l.id !== id);
+                this.saveData('fb_loans', this.loans);
+            }
+
+            exportData() {
+                const data = {
+                    loans: this.loans,
+                    stats: this.getStats(),
+                    personalCash: this.settings.personalCash,
+                    personalTransactions: this.personalTransactions,
+                    exported: new Date().toISOString()
+                };
+                return JSON.stringify(data, null, 2);
+            }
+
+            generatePDF() {
+                const canvas = document.createElement('canvas');
+                const ctx = canvas.getContext('2d');
+                canvas.width = 800;
+                canvas.height = this.loans.length * 120 + 200;
+                
+                ctx.fillStyle = '#121212';
+                ctx.fillRect(0, 0, canvas.width, canvas.height);
+                
+                ctx.fillStyle = '#4a9eff';
+                ctx.font = 'bold 32px sans-serif';
+                ctx.fillText('Family Bank Statement', 50, 60);
+                
+                const stats = this.getStats();
+                ctx.fillStyle = '#e0e0e0';
+                ctx.font = '20px sans-serif';
+                ctx.fillText(`Total Lent: ${stats.totalLent.toFixed(2)} RON`, 50, 110);
+                ctx.fillText(`Total Repaid: ${stats.totalRepaid.toFixed(2)} RON`, 50, 140);
+                ctx.fillText(`Personal Cash: ${this.settings.personalCash.toFixed(2)} RON`, 50, 170);
+                
+                let y = 200;
+                this.loans.forEach(loan => {
+                    ctx.fillStyle = '#252525';
+                    ctx.fillRect(30, y-30, canvas.width-60, 100);
+                    
+                    ctx.fillStyle = loan.status === 'paid' ? '#00c853' : '#ff5252';
+                    ctx.font = 'bold 24px sans-serif';
+                    ctx.fillText(`${loan.borrower}: ${loan.amount.toFixed(2)} RON`, 50, y);
+                    
+                    ctx.fillStyle = '#a0a0a0';
+                    ctx.font = '16px sans-serif';
+                    ctx.fillText(`Date: ${new Date(loan.date).toLocaleDateString()}`, 50, y+25);
+                    ctx.fillText(`Status: ${loan.status.toUpperCase()}`, 50, y+50);
+                    ctx.fillText(`Interest: ${(loan.interestRate || 0).toFixed(2)}% daily`, 50, y+75);
+                    
+                    y += 120;
+                });
+                
+                return canvas.toDataURL('image/png');
+            }
+        }
+
+        // Initialize App
+        const bank = new FamilyBank();
+
+        // Custom Alert System
+        function showAlert(options) {
+            const alertEl = document.getElementById('customAlert');
+            const iconEl = document.getElementById('alertIcon');
+            const titleEl = document.getElementById('alertTitle');
+            const messageEl = document.getElementById('alertMessage');
+            const buttonsEl = document.getElementById('alertButtons');
+            
+            // Set content
+            iconEl.className = `alert-icon ${options.type}`;
+            iconEl.innerHTML = options.icon || getAlertIcon(options.type);
+            titleEl.textContent = options.title;
+            messageEl.textContent = options.message;
+            
+            // Clear buttons
+            buttonsEl.innerHTML = '';
+            
+            // Add buttons
+            options.buttons.forEach(btn => {
+                const btnEl = document.createElement('button');
+                btnEl.className = `alert-btn ${btn.class || ''}`;
+                btnEl.textContent = btn.text;
+                btnEl.onclick = () => {
+                    alertEl.classList.remove('active');
+                    if (btn.onClick) btn.onClick();
+                };
+                buttonsEl.appendChild(btnEl);
+            });
+            
+            // Show alert
+            alertEl.classList.add('active');
+        }
+
+        function getAlertIcon(type) {
+            const icons = {
+                success: '<i class="fas fa-check-circle"></i>',
+                error: '<i class="fas fa-exclamation-circle"></i>',
+                warning: '<i class="fas fa-exclamation-triangle"></i>',
+                info: '<i class="fas fa-info-circle"></i>'
+            };
+            return icons[type] || '';
+        }
+
+        // Translation helper for global use
+        function t(key, params = {}) {
+            return bank.t(key, params);
+        }
+
+        // Update all UI text
+        function updateUIText() {
+            document.getElementById('langIndicator').textContent = bank.settings.language.toUpperCase();
+            document.querySelectorAll('[id]').forEach(el => {
+                const key = el.id;
+                if (translations[bank.settings.language][key]) {
+                    if (el.tagName === 'INPUT' || el.tagName === 'TEXTAREA') {
+                        el.placeholder = t(key);
+                    } else {
+                        el.textContent = t(key);
+                    }
+                }
+            });
+        }
+
+        // Navigation
+        function showPage(pageId) {
+            document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+            document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+            
+            document.getElementById(pageId).classList.add('active');
+            event.target.closest('.nav-item').classList.add('active');
+            
+            if (pageId === 'loansList') renderLoans();
+            if (pageId === 'dashboard') updateDashboard();
+        }
+
+        // Dashboard
+        function updateDashboard() {
+            const stats = bank.getStats();
+            document.getElementById('personalBalance').textContent = `${bank.settings.personalCash.toFixed(2)} RON`;
+            document.getElementById('totalBalance').textContent = `${stats.outstanding.toFixed(2)} RON`;
+            document.getElementById('totalLent').textContent = stats.totalLent.toFixed(0);
+            document.getElementById('totalRepaid').textContent = stats.totalRepaid.toFixed(0);
+            document.getElementById('loanCount').textContent = stats.activeLoans;
+            
+            const recent = bank.loans.slice(0, 3);
+            const container = document.getElementById('recentLoans');
+            container.innerHTML = recent.map(loan => `
+                <div class="loan-card">
+                    <div class="loan-header">
+                        <div class="loan-borrower">${loan.borrower}</div>
+                        <div class="loan-amount ${loan.status}">${loan.outstanding.toFixed(2)} RON</div>
+                    </div>
+                    <div class="loan-details">
+                        ${loan.reason || t('noReason')}<br>
+                        <small>${new Date(loan.date).toLocaleDateString()}</small>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        // Personal Cash Management
+        function showAddCash() {
+            document.getElementById('cashModalTitle').innerHTML = `<i class="fas fa-plus-circle"></i> ${t('addCashTitle')}`;
+            document.getElementById('cashType').value = 'add';
+            document.getElementById('cashModal').classList.add('active');
+        }
+
+        function showWithdrawCash() {
+            document.getElementById('cashModalTitle').innerHTML = `<i class="fas fa-minus-circle"></i> ${t('withdrawCashTitle')}`;
+            document.getElementById('cashType').value = 'withdraw';
+            document.getElementById('cashModal').classList.add('active');
+        }
+
+        function updatePersonalCash(event) {
+            event.preventDefault();
+            
+            const amount = parseFloat(document.getElementById('cashAmount').value);
+            const reason = document.getElementById('cashReason').value || 'No reason';
+            const type = document.getElementById('cashType').value;
+            
+            if (type === 'add') {
+                bank.settings.personalCash += amount;
+                bank.addPersonalTransaction(amount, reason, 'add');
+                showAlert({
+                    type: 'success',
+                    title: 'Success',
+                    message: t('cashUpdated'),
+                    buttons: [{ text: 'OK', class: 'primary' }]
+                });
+            } else if (type === 'withdraw') {
+                if (bank.settings.personalCash >= amount) {
+                    bank.settings.personalCash -= amount;
+                    bank.addPersonalTransaction(-amount, reason, 'withdraw');
+                    showAlert({
+                        type: 'success',
+                        title: 'Success',
+                        message: t('cashUpdated'),
+                        buttons: [{ text: 'OK', class: 'primary' }]
+                    });
+                } else {
+                    showAlert({
+                        type: 'error',
+                        title: 'Error',
+                        message: t('insufficientCash', {amount: bank.settings.personalCash.toFixed(2)}),
+                        buttons: [{ text: 'OK', class: 'danger' }]
+                    });
+                    return;
+                }
+            }
+            
+            bank.saveData('fb_settings', bank.settings);
+            closeModal('cashModal');
+            document.getElementById('cashForm').reset();
+            updateDashboard();
+        }
+
+        // Add Loan
+        function addLoan(event) {
+            event.preventDefault();
+            
+            if (bank.settings.pinEnabled && !verifyPIN()) {
+                showAlert({
+                    type: 'error',
+                    title: 'Access Denied',
+                    message: t('incorrectPIN'),
+                    buttons: [{ text: 'OK', class: 'danger' }]
+                });
+                return;
+            }
+            
+            const loan = {
+                borrower: document.getElementById('borrower').value,
+                amount: parseFloat(document.getElementById('amount').value),
+                interestRate: parseFloat(document.getElementById('interestRate').value) || 0,
+                reason: document.getElementById('reason').value,
+                deductFromCash: document.getElementById('deductFromCash').checked
+            };
+            
+            
+const inputs = document.querySelectorAll('input[required], select[required]');
+inputs.forEach(el => {
+  el.oninvalid = e => {
+    e.target.setCustomValidity('');
+    if (!e.target.validity.valid) {
+      e.target.setCustomValidity(bank.settings.language === 'ro' ? 'Câmp obligatoriu' : 'Required field');
+    }
+  };
+  el.oninput = e => e.target.setCustomValidity('');
+});
+            try {
+                bank.addLoan(loan);
+                document.getElementById('loanForm').reset();
+                document.getElementById('photoPreview').innerHTML = '';
+                showAlert({
+                    type: 'success',
+                    title: 'Success',
+                    message: t('loanCreated'),
+                    buttons: [{ text: 'OK', class: 'primary', onClick: () => showPage('dashboard') }]
+                });
+            } catch (e) {
+                if (e.message === 'INSUFFICIENT_CASH') {
+                    showAlert({
+                        type: 'error',
+                        title: 'Insufficient Funds',
+                        message: t('insufficientCash', {amount: bank.settings.personalCash.toFixed(2)}),
+                        buttons: [{ text: 'OK', class: 'danger' }]
+                    });
+                }
+            }
+        }
+
+        // Camera functions
+        let stream = null;
+        async function openCamera() {
+            try {
+                stream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: 'environment' } });
+                document.getElementById('video').srcObject = stream;
+                document.getElementById('cameraModal').classList.add('active');
+            } catch (err) {
+                showAlert({
+                    type: 'error',
+                    title: 'Camera Error',
+                    message: 'Camera not available: ' + err.message,
+                    buttons: [{ text: 'OK', class: 'danger' }]
+                });
+            }
+        }
+
+        function capturePhoto() {
+            const video = document.getElementById('video');
+            const canvas = document.getElementById('canvas');
+            const ctx = canvas.getContext('2d');
+            
+            canvas.width = video.videoWidth;
+            canvas.height = video.videoHeight;
+            ctx.drawImage(video, 0, 0);
+            
+            bank.capturedPhoto = canvas.toDataURL('image/jpeg');
+            
+            stream.getTracks().forEach(track => track.stop());
+            document.getElementById('cameraModal').classList.remove('active');
+            
+            document.getElementById('photoPreview').innerHTML = `
+                <img src="${bank.capturedPhoto}" style="width: 100%; border-radius: 8px;">
+            `;
+        }
+
+        function handleFileSelect(event) {
+            const file = event.target.files[0];
+            if (!file) return;
+            
+            const reader = new FileReader();
+            reader.onload = e => {
+                bank.capturedPhoto = e.target.result;
+                document.getElementById('photoPreview').innerHTML = `
+                    <img src="${bank.capturedPhoto}" style="width: 100%; border-radius: 8px;">
+                `;
+            };
+            reader.readAsDataURL(file);
+        }
+
+        function closeModal(modalId) {
+            document.getElementById(modalId).classList.remove('active');
+            if (stream) {
+                stream.getTracks().forEach(track => track.stop());
+                stream = null;
+            }
+        }
+
+        // Loans List
+        function renderLoans() {
+            const loans = bank.getLoans(bank.currentFilter);
+            const container = document.getElementById('loansContainer');
+            
+            if (loans.length === 0) {
+                container.innerHTML = `<div class="text-center" style="color: var(--text-secondary); padding: 40px;">${t('noLoansFound')}</div>`;
+                return;
+            }
+            
+            container.innerHTML = loans.map(loan => {
+                bank.calculateInterest(loan);
+                return `
+                    <div class="loan-card">
+                        <div class="loan-header">
+                            <div>
+                                <div class="loan-borrower">${loan.borrower}</div>
+                                <span class="status-badge status-${loan.status}">${t('status' + loan.status.charAt(0).toUpperCase() + loan.status.slice(1))}</span>
+                            </div>
+                            <div class="loan-amount ${loan.status}">${loan.outstanding.toFixed(2)} RON</div>
+                        </div>
+                        <div class="loan-details">
+                            <strong>${t('loanAmount')}:</strong> ${loan.amount.toFixed(2)} RON<br>
+                            ${loan.interestRate > 0 ? `<strong>${t('interestAccrued')}:</strong> ${(loan.interestAccrued || 0).toFixed(2)} RON<br>` : ''}
+                            <strong>${t('dateLabel')}:</strong> ${new Date(loan.date).toLocaleDateString()}<br>
+                            ${loan.reason ? `<strong>${t('reasonLabel')}:</strong> ${loan.reason}<br>` : ''}
+                            ${loan.repayments.length > 0 ? `<strong>${t('repayments')}:</strong> ${loan.repayments.length}<br>` : ''}
+                            ${loan.attachments.length > 0 ? '📸 ' + t('photoAttached') + '<br>' : ''}
+                        </div>
+                        <div class="loan-actions">
+                            <button class="btn btn-success" onclick="repayLoan('${loan.id}')">
+                                <i class="fas fa-donate"></i> ${t('repayLoan')}
+                            </button>
+                            <button class="btn btn-warning" onclick="viewDetails('${loan.id}')">
+                                <i class="fas fa-info-circle"></i> ${t('viewDetails')}
+                            </button>
+                            ${bank.settings.pinEnabled ? '' : `<button class="btn btn-danger" onclick="deleteLoan('${loan.id}')"><i class="fas fa-trash"></i> ${t('deleteLoan')}</button>`}
+                        </div>
+                        <div class="swipe-hint"><i class="fas fa-hand-pointer"></i> Swipe for quick actions</div>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        function filterLoans(filter) {
+            bank.currentFilter = filter;
+            document.querySelectorAll('.filter-chip').forEach(c => c.classList.remove('active'));
+            event.target.classList.add('active');
+            renderLoans();
+        }
+
+        function repayLoan(loanId) {
+            const loan = bank.loans.find(l => l.id === loanId);
+            if (!loan) return;
+            
+            document.getElementById('repayLoanSelect').innerHTML = 
+                `<option value="${loan.id}">${loan.borrower} - ${loan.outstanding.toFixed(2)} RON</option>`;
+            document.getElementById('repayAmount').value = loan.outstanding.toFixed(2);
+            document.getElementById('repayModal').classList.add('active');
+        }
+
+        function quickRepay() {
+            const pending = bank.loans.filter(l => l.status !== 'paid');
+            if (pending.length === 0) {
+                showAlert({
+                    type: 'info',
+                    title: 'No Loans',
+                    message: t('noPendingLoans'),
+                    buttons: [{ text: 'OK', class: 'primary' }]
+                });
+                return;
+            }
+            
+            const select = document.getElementById('repayLoanSelect');
+            select.innerHTML = pending.map(l => 
+                `<option value="${l.id}">${l.borrower} - ${l.outstanding.toFixed(2)} RON</option>`
+            ).join('');
+            
+            document.getElementById('repayModal').classList.add('active');
+        }
+
+        function processRepayment(event) {
+            event.preventDefault();
+            
+            const loanId = document.getElementById('repayLoanSelect').value;
+            const amount = parseFloat(document.getElementById('repayAmount').value);
+            const method = document.getElementById('paymentMethod').value;
+            
+            if (bank.repayLoan(loanId, amount, method)) {
+                showAlert({
+                    type: 'success',
+                    title: 'Success',
+                    message: t('repaymentSuccess', {amount: amount.toFixed(2)}),
+                    buttons: [{ text: 'OK', class: 'primary' }]
+                });
+                closeModal('repayModal');
+                renderLoans();
+                updateDashboard();
+            } else {
+                showAlert({
+                    type: 'error',
+                    title: 'Error',
+                    message: t('repaymentFailed'),
+                    buttons: [{ text: 'OK', class: 'danger' }]
+                });
+            }
+        }
+
+        function viewDetails(loanId) {
+            const loan = bank.loans.find(l => l.id === loanId);
+            if (!loan) return;
+            
+            bank.calculateInterest(loan);
+            
+            let details = `${t('loanDetails')}\n\n`;
+            details += `${t('borrowerLabel')}: ${loan.borrower}\n`;
+            details += `${t('loanAmount')}: ${loan.amount.toFixed(2)} RON\n`;
+            details += `${t('interestAccrued')}: ${(loan.interestAccrued || 0).toFixed(2)} RON\n`;
+            details += `${t('dateLabel')}: ${new Date(loan.date).toLocaleDateString()}\n`;
+            details += `${t('statusLabel')}: ${loan.status.toUpperCase()}\n`;
+            details += `${t('reasonLabel')}: ${loan.reason || t('noReason')}\n`;
+            
+            if (loan.repayments.length > 0) {
+                details += `\n${t('repayments')}:\n`;
+                loan.repayments.forEach(r => {
+                    details += `- ${r.amount.toFixed(2)} RON ${t('onDate')} ${new Date(r.date).toLocaleDateString()} (${r.method})\n`;
+                });
+            }
+            
+            showAlert({
+                type: 'info',
+                title: 'Loan Details',
+                message: details,
+                buttons: [{ text: 'OK', class: 'primary' }]
+            });
+            
+            if (loan.attachments.length > 0) {
+                const img = new Image();
+                img.src = loan.attachments[0];
+                img.style.maxWidth = '100%';
+                img.style.marginTop = '10px';
+                img.style.borderRadius = '8px';
+                document.getElementById('customAlert').querySelector('.alert-message').appendChild(img);
+            }
+        }
+
+        function deleteLoan(id) {
+            showAlert({
+                type: 'warning',
+                title: 'Confirm Delete',
+                message: t('deleteConfirm'),
+                buttons: [
+                    { text: 'Cancel', class: 'primary' },
+                    { 
+                        text: 'Delete', 
+                        class: 'danger',
+                        onClick: () => {
+                            bank.deleteLoan(id);
+                            renderLoans();
+                            updateDashboard();
+                        }
+                    }
+                ]
+            });
+        }
+
+        // Settings functions
+        function togglePIN() {
+            const toggle = document.getElementById('pinToggle');
+            toggle.classList.toggle('active');
+            bank.settings.pinEnabled = toggle.classList.contains('active');
+            
+            if (bank.settings.pinEnabled && !bank.settings.pin) {
+                const pin = prompt(t('setPIN'));
+                if (pin && pin.length === 4 && /^\d+$/.test(pin)) {
+                    bank.settings.pin = pin;
+                    bank.saveData('fb_settings', bank.settings);
+                } else {
+                    showAlert({
+                        type: 'error',
+                        title: 'Error',
+                        message: t('invalidPIN'),
+                        buttons: [{ text: 'OK', class: 'danger' }]
+                    });
+                    toggle.classList.remove('active');
+                    bank.settings.pinEnabled = false;
+                }
+            }
+            
+            bank.saveData('fb_settings', bank.settings);
+        }
+
+        function verifyPIN() {
+            if (!bank.settings.pinEnabled) return true;
+            const pin = prompt(t('enterPIN'));
+            return pin === bank.settings.pin;
+        }
+
+        function backupData() {
+            const data = bank.exportData();
+            const blob = new Blob([data], { type: 'application/json' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `family-bank-backup-${new Date().toISOString().split('T')[0]}.json`;
+            a.click();
+            URL.revokeObjectURL(url);
+            
+            showAlert({
+                type: 'success',
+                title: 'Success',
+                message: 'Backup created!',
+                buttons: [{ text: 'OK', class: 'primary' }]
+            });
+        }
+
+        function restoreData() {
+            const input = document.createElement('input');
+            input.type = 'file';
+            input.accept = '.json';
+            input.onchange = e => {
+                const file = e.target.files[0];
+                const reader = new FileReader();
+                reader.onload = event => {
+                    try {
+                        const data = JSON.parse(event.target.result);
+                        if (data.loans && Array.isArray(data.loans)) {
+                            bank.loans = data.loans;
+                            bank.saveData('fb_loans', bank.loans);
+                        }
+                        if (data.personalCash !== undefined) {
+                            bank.settings.personalCash = data.personalCash;
+                        }
+                        if (data.personalTransactions) {
+                            bank.personalTransactions = data.personalTransactions;
+                            bank.saveData('fb_cash_transactions', bank.personalTransactions);
+                        }
+                        bank.saveData('fb_settings', bank.settings);
+                        showAlert({
+                            type: 'success',
+                            title: 'Success',
+                            message: t('dataRestored'),
+                            buttons: [{ text: 'OK', class: 'primary', onClick: () => location.reload() }]
+                        });
+                    } catch (err) {
+                        showAlert({
+                            type: 'error',
+                            title: 'Error',
+                            message: t('invalidBackup'),
+                            buttons: [{ text: 'OK', class: 'danger' }]
+                        });
+                    }
+                };
+                reader.readAsText(file);
+            };
+            input.click();
+        }
+
+        function clearAllData() {
+            showAlert({
+                type: 'warning',
+                title: 'Clear All Data',
+                message: t('deleteConfirm'),
+                buttons: [
+                    { text: 'Cancel', class: 'primary' },
+                    { 
+                        text: 'Delete', 
+                        class: 'danger',
+                        onClick: () => {
+                            showAlert({
+                                type: 'warning',
+                                title: 'Final Warning',
+                                message: t('lastChanceConfirm'),
+                                buttons: [
+                                    { text: 'Cancel', class: 'primary' },
+                                    { 
+                                        text: 'Clear All', 
+                                        class: 'danger',
+                                        onClick: () => {
+                                            bank.loans = [];
+                                            bank.personalTransactions = [];
+                                            bank.settings.personalCash = 0;
+                                            bank.saveData('fb_loans', bank.loans);
+                                            bank.saveData('fb_settings', bank.settings);
+                                            bank.saveData('fb_cash_transactions', bank.personalTransactions);
+                                            showAlert({
+                                                type: 'success',
+                                                title: 'Cleared',
+                                                message: t('dataCleared'),
+                                                buttons: [{ text: 'OK', class: 'primary', onClick: () => location.reload() }]
+                                            });
+                                        }
+                                    }
+                                ]
+                            });
+                        }
+                    }
+                ]
+            });
+        }
+
+        function exportData() {
+            const format = confirm('Export as PDF image? (Cancel for JSON file)');
+            if (format) {
+                const pdf = bank.generatePDF();
+                const a = document.createElement('a');
+                a.href = pdf;
+                a.download = `statement-${new Date().toISOString().split('T')[0]}.png`;
+                a.click();
+            } else {
+                backupData();
+            }
+        }
+
+        function toggleLanguage() {
+            bank.settings.language = bank.settings.language === 'en' ? 'ro' : 'en';
+            bank.saveData('fb_settings', bank.settings);
+            updateUIText();
+        }
+
+        // Swipe gestures
+        let touchStartX = 0;
+        let touchEndX = 0;
+
+        document.addEventListener('touchstart', e => {
+            touchStartX = e.changedTouches[0].screenX;
+        });
+
+        document.addEventListener('touchend', e => {
+            touchEndX = e.changedTouches[0].screenX;
+            handleSwipe(e.target);
+        });
+
+        function handleSwipe(target) {
+            const swipeDistance = touchEndX - touchStartX;
+            if (Math.abs(swipeDistance) < 50) return;
+            
+            const card = target.closest('.loan-card');
+            if (!card) return;
+            
+            const loanId = card.querySelector('.btn-success').getAttribute('onclick').match(/'([^']+)'/)[1];
+            
+            if (swipeDistance > 0) {
+                showAlert({
+                    type: 'info',
+                    title: 'Swipe Detected',
+                    message: t('swipePaid'),
+                    buttons: [
+                        { text: 'Cancel', class: 'primary' },
+                        { 
+                            text: 'Mark Paid', 
+                            class: 'success',
+                            onClick: () => {
+                                const loan = bank.loans.find(l => l.id === loanId);
+                                if (loan && loan.outstanding > 0) {
+                                    bank.repayLoan(loanId, loan.outstanding, t('swipePayment'));
+                                    renderLoans();
+                                    updateDashboard();
+                                }
+                            }
+                        }
+                    ]
+                });
+            } else {
+                repayLoan(loanId);
+            }
+        }
+
+        // Initialize
+        document.addEventListener('DOMContentLoaded', () => {
+            updateUIText();
+            updateDashboard();
+            
+            if (bank.settings.pinEnabled) {
+                document.getElementById('pinToggle').classList.add('active');
+            }
+            if (bank.settings.interestRate > 0) {
+                document.getElementById('interestDisplay').textContent = t('interestDisplayText', {rate: bank.settings.interestRate});
+            }
+            document.getElementById('deductFromCash').checked = true;
+        });
+
+        // PWA Support
+        if ('serviceWorker' in navigator) {
+            navigator.serviceWorker.register('data:text/javascript,' + encodeURIComponent(`
+                self.addEventListener('install', e => e.waitUntil(self.skipWaiting()));
+                self.addEventListener('activate', e => e.waitUntil(self.clients.claim()));
+                self.addEventListener('fetch', e => e.respondWith(fetch(e.request).catch(() => new Response('Offline'))));
+            `));
+        }
+
+        // Install prompt
+        let deferredPrompt;
+        window.addEventListener('beforeinstallprompt', e => {
+            deferredPrompt = e;
+            setTimeout(() => {
+                if (confirm('Install Family Bank as an app?')) {
+                    deferredPrompt.prompt();
+                }
+            }, 3000);
+        });
+    </script>
+</body>
+</html>
